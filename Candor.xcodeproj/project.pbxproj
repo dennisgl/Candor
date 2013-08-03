@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BD5B841E1717827500776466 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD5B841D1717827500776466 /* main.cpp */; };
 		BD5B84201717827500776466 /* Candor.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = BD5B841F1717827500776466 /* Candor.1 */; };
+		BD80331B1717A65700F5613C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BD8033191717A65700F5613C /* main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,8 +26,9 @@
 
 /* Begin PBXFileReference section */
 		BD5B84191717827500776466 /* Candor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Candor; sourceTree = BUILT_PRODUCTS_DIR; };
-		BD5B841D1717827500776466 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		BD5B841F1717827500776466 /* Candor.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Candor.1; sourceTree = "<group>"; };
+		BD8033191717A65700F5613C /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		BD80331A1717A65700F5613C /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,8 +61,9 @@
 		BD5B841C1717827500776466 /* Candor */ = {
 			isa = PBXGroup;
 			children = (
-				BD5B841D1717827500776466 /* main.cpp */,
 				BD5B841F1717827500776466 /* Candor.1 */,
+				BD8033191717A65700F5613C /* main.cpp */,
+				BD80331A1717A65700F5613C /* main.h */,
 			);
 			path = Candor;
 			sourceTree = "<group>";
@@ -116,7 +118,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BD5B841E1717827500776466 /* main.cpp in Sources */,
+				BD80331B1717A65700F5613C /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -179,6 +181,24 @@
 		BD5B84241717827500776466 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LIBRARY = "libstdc++";
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/include;
+				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib;
+				New_Setting = "";
+				"OTHER_LDFLAGS[arch=*]" = (
+					"-lopencv_core",
+					"-lopencv_highgui",
+					"-lopencv_imgproc",
+					"-lopencv_legacy",
+					"-lopencv_contrib",
+					"-lopencv_calib3d",
+					"-lopencv_features2d",
+					"-lopencv_flann",
+					"-lopencv_ml",
+					"-lopencv_objdetect",
+					"-lopencv_video",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -186,6 +206,24 @@
 		BD5B84251717827500776466 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LIBRARY = "libstdc++";
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/include;
+				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib;
+				New_Setting = "";
+				"OTHER_LDFLAGS[arch=*]" = (
+					"-lopencv_core",
+					"-lopencv_highgui",
+					"-lopencv_imgproc",
+					"-lopencv_legacy",
+					"-lopencv_contrib",
+					"-lopencv_calib3d",
+					"-lopencv_features2d",
+					"-lopencv_flann",
+					"-lopencv_ml",
+					"-lopencv_objdetect",
+					"-lopencv_video",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -209,6 +247,7 @@
 				BD5B84251717827500776466 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
