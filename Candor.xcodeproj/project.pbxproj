@@ -27,6 +27,7 @@
 /* Begin PBXFileReference section */
 		BD5B84191717827500776466 /* Candor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Candor; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD5B841F1717827500776466 /* Candor.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Candor.1; sourceTree = "<group>"; };
+		BD68D69E17ADB5990021FAAA /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 		BD8033191717A65700F5613C /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		BD80331A1717A65700F5613C /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -45,6 +46,7 @@
 		BD5B840E1717827500776466 = {
 			isa = PBXGroup;
 			children = (
+				BD68D69E17ADB5990021FAAA /* README.md */,
 				BD5B841C1717827500776466 /* Candor */,
 				BD5B841A1717827500776466 /* Products */,
 			);
