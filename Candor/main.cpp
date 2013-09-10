@@ -37,7 +37,7 @@ int cr_range[2] = {135,180};
 int cb_range[2] = {85,125};
 
 
-int cr_min_std = 25;
+int cr_min_std = 10;
 int cr_max_std = 25;
 int cb_min_std = 25;
 int cb_max_std = 25;
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     fgbg.set("nmixtures", 3);
     fgbg.set("detectShadows", false);
     
-    int ndiv = 13 ; // color quantization
+    int ndiv = 25 ; // color quantization
     cvCreateTrackbar("ndiv", "Original", &ndiv, 100 );
     
     for(;;)
@@ -143,10 +143,21 @@ int main(int argc, char *argv[])
                 cq_a.convertTo( cq_b, cq_a.type(), 1.0/div, 0);
                 cq_b.convertTo( cq_b, cq_b.type(), div, 0);
                 //imshow("cq output image",cq_b);
-                
+             
             }
+            
+            //pyrMeanShiftFiltering(cq_a, cq_b, 20, 20, 1, TermCriteria( TermCriteria::MAX_ITER+TermCriteria::EPS,5,3));
+            
+            int input_x = frame.cols;
+            int input_y = frame.rows;
+            rectangle( cq_b, cvPoint( 0, 0), cvPoint( input_x, input_y), Scalar( 255, 255, 0 ), 5, 8, 0 );
+            
+            
+            imshow("cq output image",cq_b);
             //cv::waitKey(0);
             // end color quantization
+            
+            
             
             detectAndDisplay(frame,cq_b);
             //if ( frame.empty() ) continue;
@@ -189,17 +200,27 @@ int main(int argc, char *argv[])
             int max_contour=0;
             for( int i = 0; i< contours.size(); i++ )
             {
-                //if ( fabs(contourArea(contours[i],false)) < 200 ) continue;
-                if ( fabs(contourArea(contours[i],false)) > fabs(contourArea(contours[max_contour],false)) )
+                // if ( fabs(contourArea(contours[i],false)) < 300 ) continue;
+                //if ( fabs(contourArea(contours[i],false)) > fabs(contourArea(contours[max_contour],false)) )
+                if ( contourArea(contours[i],false) > contourArea(contours[max_contour],false) )
                     max_contour = i ;
+                
+                
                 
                 Scalar color = Scalar( 255,0,255 );
                 drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+                
+                
                 
             }
             Scalar color = Scalar( 50,50,255 );
             drawContours( drawing, contours, max_contour, color, 2, 8, hierarchy, 0, Point() );
             
+            std::ostringstream sstream;
+            sstream << contourArea(contours[max_contour],false);
+            string str_area = sstream.str();
+            
+            putText(drawing, str_area, cvPoint(10, 20), FONT_HERSHEY_SIMPLEX, 1, Scalar( 0,255,255 ));
             
             
             imshow("Contours", drawing);
