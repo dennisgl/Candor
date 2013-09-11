@@ -44,6 +44,8 @@ int cb_max_std = 25;
 
 
 
+
+
 int main(int argc, char *argv[])
 {
     
@@ -109,10 +111,10 @@ int main(int argc, char *argv[])
 	cvCreateTrackbar("cb_max", "Original", &cb_range[1], 255 );
     */
     
-    cvCreateTrackbar("cr_min_std", "Original", &cr_min_std, 200 );
-    cvCreateTrackbar("cr_max_std", "Original", &cr_max_std, 200 );
-	cvCreateTrackbar("cb_min_std", "Original", &cb_min_std, 200 );
-    cvCreateTrackbar("cb_max_std", "Original", &cb_max_std, 200 );
+    cvCreateTrackbar("0: cr_min_std", "Original", &cr_min_std, 200 );
+    cvCreateTrackbar("1: cr_max_std", "Original", &cr_max_std, 200 );
+	cvCreateTrackbar("2: cb_min_std", "Original", &cb_min_std, 200 );
+    cvCreateTrackbar("3: cb_max_std", "Original", &cb_max_std, 200 );
     
 	Mat inputf, frame, fgmask;
 	BackgroundSubtractorMOG2 fgbg;
@@ -121,7 +123,17 @@ int main(int argc, char *argv[])
     fgbg.set("detectShadows", false);
     
     int ndiv = 25 ; // color quantization
-    cvCreateTrackbar("ndiv", "Original", &ndiv, 100 );
+    cvCreateTrackbar("4: ndiv", "Original", &ndiv, 100 );
+    
+    namedWindow("frame",1);
+    int ar=0, ag=0, ab=0;
+    cvCreateTrackbar("0: ar", "frame", &ar, 255 );
+    cvCreateTrackbar("1: ag", "frame", &ag, 255 );
+    cvCreateTrackbar("2: ab", "frame", &ab, 255 );
+    
+    
+    double lastMaxArea = -1;
+    bool isFirstFrame = true;
     
     for(;;)
     {
@@ -129,6 +141,13 @@ int main(int argc, char *argv[])
             cap >> inputf; // get a new frame from camera
             cv::resize(inputf, frame, Size(), 0.618, 0.618);
             flip(frame,frame,1);
+            
+            
+            frame += Scalar( ab, ag, ar );
+            
+            imshow("frame", frame);
+            
+            //while(waitKey(30) != 27);
             
             // begin color quantization
             
@@ -181,51 +200,18 @@ int main(int argc, char *argv[])
             //rectangle(edges, Point(0,0), Point(edges.size().width,edges.size().height), Scalar( 0, 0, 0 ), 10, 8, 0 );
             //detectAndDisplay( frame );
             
-            
+            Mat edgesOri = Mat(edges);
             cvtColor( edges, edges, CV_BGR2GRAY );
             
 			
             edges = edges > 0;
+            
             //imshow("Threshold", edges);
+
             
+            
+            //skel begin
             morphologyEx(edges, edges, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE,Size(5,5)));
-            //---canny&contour
-            int thresh = 150;
-            Mat canny_output;
-            Canny( edges, canny_output, thresh, thresh*2, 3 );
-            vector<vector<Point> > contours;
-            vector<Vec4i> hierarchy;
-            findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
-            Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
-            int max_contour=0;
-            for( int i = 0; i< contours.size(); i++ )
-            {
-                // if ( fabs(contourArea(contours[i],false)) < 300 ) continue;
-                //if ( fabs(contourArea(contours[i],false)) > fabs(contourArea(contours[max_contour],false)) )
-                if ( contourArea(contours[i],false) > contourArea(contours[max_contour],false) )
-                    max_contour = i ;
-                
-                
-                
-                Scalar color = Scalar( 255,0,255 );
-                drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
-                
-                
-                
-            }
-            Scalar color = Scalar( 50,50,255 );
-            drawContours( drawing, contours, max_contour, color, 2, 8, hierarchy, 0, Point() );
-            
-            std::ostringstream sstream;
-            sstream << contourArea(contours[max_contour],false);
-            string str_area = sstream.str();
-            
-            putText(drawing, str_area, cvPoint(10, 20), FONT_HERSHEY_SIMPLEX, 1, Scalar( 0,255,255 ));
-            
-            
-            imshow("Contours", drawing);
-            
-            //---canny&contour
             
             Mat skimg = edges;
             int skElemSize = skimg.rows*skimg.cols*skimg.channels();
@@ -258,7 +244,11 @@ int main(int argc, char *argv[])
             }
             
             imshow("Skel", skel);
+             
+             // skel end
+             
             
+            // DT begin
             
             Mat dtimg ;
             Mat labels ;
@@ -270,28 +260,138 @@ int main(int argc, char *argv[])
             skel.convertTo(skel32,CV_32F);
             //cout << ((dtimg.type() == skel32.type())? "Type Matched":"Oops") << endl;
             
-            /*
-             Mat dist8u;
-             voronoiGen( dtimg, dist8u, labels);
-             imshow("labels", dist8u);
-             */
+
+             
+
             
             double dt_min_value, dt_max_value;
             Point dt_min_point, dt_max_point;
             minMaxLoc(dtimg, &dt_min_value, &dt_max_value, &dt_min_point, &dt_max_point);
             printf("[dt]min/max: (%f/%f)\n", dt_min_value, dt_max_value);
             
-            Mat dt_mask;
+            Mat dt_mask(frame.size(), CV_8U);
             frame.copyTo(dt_mask);
             multiply(dt_mask, dt_mask, dt_mask, 0);
             
-            ellipse( dt_mask, dt_max_point+Point(0,-dt_max_point.y*0.2), Size( dt_max_value*2.5, dt_max_value*2.5 ), 0, 0, 360, Scalar( 255, 255, 255 ), -1, 8, 0 );
+            ellipse( dt_mask, dt_max_point+Point(0,-dt_max_point.y*0.2), Size( dt_max_value*3, dt_max_value*3 ), 0, 0, 360, Scalar( 255, 255, 255 ), -1, 8, 0 );
             
             Mat dt_crop;
             frame.copyTo(dt_crop,dt_mask);
             imshow("SK2", dt_crop);
             
             normalize(dtimg, dtimg, 0.0, 1.0, NORM_MINMAX);
+             
+             // DT end
+             
+            
+            
+            
+            //---canny&contour begin
+            
+            Mat edges_crop;
+            edgesOri.copyTo(edges_crop,dt_mask);
+            
+            ellipse( edges_crop, dt_max_point+Point(0,-dt_max_point.y*0.2), Size( dt_max_value*3, dt_max_value*3 ), 0, 0, 360, Scalar( 0, 255, 255 ), 2, 8, 0 );
+            
+            cvtColor(edges_crop,edges_crop, CV_BGR2GRAY);
+            edges_crop = edges_crop>0;
+            
+            imshow("tmp",edges_crop);
+            
+            
+            
+            int thresh = 150;
+            Mat canny_output;
+            Canny( edges, canny_output, thresh, thresh*2, 3 );
+            //Canny( edges_crop, canny_output, thresh, thresh*2, 3 );
+            vector<vector<Point> > contours;
+            vector<Vec4i> hierarchy;
+            findContours( canny_output, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+            Mat contourCanvas;
+            
+            if (isFirstFrame) {
+                contourCanvas = Mat::zeros( canny_output.size(), CV_8UC3 );
+            }
+            
+            int max_contour=0;
+            
+            if (contours.size()<=0) max_contour = -1;
+            
+            for( int i = 0; i < contours.size(); i++ )
+            {
+                if ( fabs(contourArea(contours[i],false)) < 300 ) continue;
+                //if ( fabs(contourArea(contours[i],false)) > fabs(contourArea(contours[max_contour],false)) )
+                if ( contourArea(contours[i],false) > contourArea(contours[max_contour],false) )
+                    max_contour = i ;
+                /*
+                // draw each contour
+                Scalar color = Scalar( 255,0,255 );
+                drawContours( contourCanvas, contours, i, color, 2, 8, hierarchy, 0, Point() );
+                
+                
+                
+                
+                Rect boundRect = boundingRect( contours[i] );
+                
+                std::ostringstream sstream;
+                sstream << contourArea(contours[i],false);
+                string str_area = sstream.str();
+                
+                putText(contourCanvas, str_area, cvPoint(boundRect.x+boundRect.width/2, boundRect.y+boundRect.height/2), FONT_HERSHEY_SIMPLEX, 0.6f, Scalar( 0,255,255 ));
+                
+                imshow("Contours", contourCanvas);
+                //cout << "now: " << i << " ( " << boundRect.width << ", " << boundRect.height << ")"<< endl;
+                
+                waitKey(100);
+                */
+                
+            }
+            
+            //while(waitKey(30)!=27);
+            
+            if ( max_contour != -1 ) {
+                bool foundLegitMax = false;
+                double nowMaxArea = contourArea(contours[max_contour],false);
+                
+                
+                
+                if ( lastMaxArea == -1 ) {
+                    foundLegitMax = true;
+                }
+                else if ( nowMaxArea > lastMaxArea ) {
+                    if ( nowMaxArea/lastMaxArea < 20 ) {
+                        foundLegitMax = true;
+                    }
+                } else {
+                    if ( lastMaxArea/nowMaxArea <= 2.5 ) {
+                        foundLegitMax = true;
+                    }
+                }
+                
+                
+                if ( foundLegitMax ) {
+                    contourCanvas = Mat::zeros( canny_output.size(), CV_8UC3 );
+                    
+                    lastMaxArea = nowMaxArea;
+                    Scalar color = Scalar( 50,50,255 );
+                    drawContours( contourCanvas, contours, max_contour, color, CV_FILLED, 8, hierarchy, 0, Point() );
+                    
+                    std::ostringstream sstream;
+                    sstream << nowMaxArea;
+                    string str_area = sstream.str();
+                    
+                    putText(contourCanvas, str_area, cvPoint(10, 20), FONT_HERSHEY_SIMPLEX, 0.6f, Scalar( 0,255,255 ));
+                    
+                    imshow("Contours", contourCanvas);
+                }
+                 
+            }
+            
+            
+            
+            //while(waitKey(30)!=27);
+            
+            //---canny&contour end
             
             
             
@@ -351,6 +451,8 @@ int main(int argc, char *argv[])
             
             if(waitKey(30) == 27) break;
 		} catch(cv::Exception) {};
+        
+        if ( isFirstFrame ) isFirstFrame = false;
     }
     
     // the camera will be deinitialized automatically in VideoCapture destructor
